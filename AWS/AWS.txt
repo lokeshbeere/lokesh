@@ -1,0 +1,179 @@
+Putty : How to connect :
+Download key pair 
+convert Pem to ppk by using putty gen app
+open putty gen app -  Load - select that particular file - save private key.
+open putty -. go to ssh -auth- give that path of PPK file and - go to session ---- in the host name give ( ec2-user@public ip )give the name in key pair--save --- open 
+
+
+
+01-10-19
+
+================837 279 786 id
+
+AMI ( Amazon machine image )
+
+IQ : how to restore a key if u loose that file
+	
+----------------
+public key kept on ec2 and  allows us to download private ( we can have it on pc) ;doubt
+private key is available on our lap.
+private key is valiated against public key
+you lost private key then ?
+if we remove public key also we cant login
+---------
+take backup -actions - image - create image 
+image name:
+ok
+we have taken a backup and we can launch that instance 
+choose new key pair 
+--- Exp : sol 1 :     Take ami of ec2 on that ami launch new Ec2 and select new key pair.
+sol2 : Foe ec2 we have hdd called ebs volumes - tehnically public key stored on EBs volumes 
+
+detach (volumes select that one , detach volume )ebs volume from that ec2 and attach to other ec2 
+
+go to putty - generate public/private key - we get public /private key - 
+
+-- exp : detach volume from ec2  forwhich we lost private key 
+	attach this volume to diff Ec2
+	generate new public and private keys
+	replace old public key with new public key 
+
+------------------------------
+Ami we can give permissions with other  give aws acnt number of the person - such that you will have acces to that AMI - note : region specific - we should have to see in same region - we can make public or private
+--
+We can launch ec2 from our custom AMI
+
+===========================
+EBS (Elastic block store )
+
+- volume here behavs as like external harddisk
+if i install apche it goes to volume 
+Ebs volumes and its characteristics
+- Ebs volumes are persistent ( what ever the data sored is permanent )
+- It is durable ( durable - you will not loose the data ) - how ?  for each single volume data is replicated on two diff physical components (built in)
+-we can resize the volumes ( we can increase size ---we cant decrease size)
+-volumes are specific to AZ ( i.e : Ec2 instances in same AZ can only use volumes in same AZ) Zone specific
+-At any given point of time your volume can be attached to one Ec2 instance. we can't attach to 2 instances at a time.
+- one Ec2 can have multiple volumes 
+if your volumes has sensitive progs - if i share it goes throug netwk.
+EBS volumes can be encrypted if required 
+EBS volume is a sub service of ec2 ( we can't direcly aceess volumes )
+
+---There are diff types of volumes for diff types of apps --
+
+
+EBS SNAPSHOTS
+
+EBS Snapshots ( snapshots are volume backups) where AMI's are Ec2 backup
+-Snapshots are stored in S3
+-EBS snapshots are incrimental backup ( i.e when u take a new snapshot this contains a data which got changed after previous snapshot )
+
+-------------Types of Volumes--------------
+
+General purpose SSD ( solid state drives - fast disks - disk is fast - boot time is fast )
+Provisioned IOPS
+
+
+
+
+
+03-10-10
+
+IQ : 
+
+As of today EBS max provides 80000 IOPS per second , wht if your  application demandes more than that 
+ans) : configure Raid0
+		Raid0 is used for increasing IOPS
+
+I/o credits and burst performance in general purpose.
+IN general purpose base line performance is decided based on its size ( for ex : we have created 100 gb disk which gives 300 IOPS as a base line )
+depending on size of volume I/o Credits are accumulated.
+when application needs or demands above base line performance amazon takes credit points and gives you bcak more performance , after credit points exhausted performance falls back to base line.
+
+Magnetic storage:
+it is previous generation volume , if you have legacy app which is designed to perform on magnetic then only use it other wise no
+
+IQ :
+what is instance store :
+Ebs volume is not physically attached to Ec2 , it is seperate component.
+while coming to instance store : it is temporary volume which is physiccaly attached to ec2 instance.
+ec2 can be launnched with EBS or instance store
+data stpred on instance is lost in following scenarios :- Ec2  is stoped or terminated data is lost . if rebotted it wont lost.
+
+IQ: 
+when would we use instance store .
+cost is cheap
+use instance store for temporary data like cache, application logs buffers etc. (its not used mostly ).
+process :- community ami, we have lot of options to filter , select that particular one and launch
+
+==========================================How to automate EBs SNAPSHOTS Creation====================
+with the help of life cycle manager for creating and deleting snapshots automatically
+
+Sccenario: Create life cycle manager to create snapshots every 6 hours . Retain 30 days old snapshots and delete others
+
+EC2 - Life cycle manager - policy --> create 
+
+=================================================================================================================================
+ Networking :-
+ Networking is must in order to deploy our cloud resources like EC2 , RDS etc .
+Networking isolates our resources and it can be easily secured USING FIREWALLS  <---- (why we use networking ?)
+
+
+VPC:-
+
+virtual private cloud i.e it is like virtuall network or virtuall data centre 
+vpc spans a complete region 
+we cant deploy resources directly in to Vpc we need subnets
+
+Subnets :-
+Subnet is smaller n/w inside Vpc ,subnet spans AZ
+
+pubic subnet :- (IQ)
+It is a subnet which is exposed to internet (anybody over internet have acess to Public internet) 
+All our internet facing apps must be in public subnet. ( ex - web applications, 
+
+Private subnet:- (IQ)
+
+it is a subnet which is accesable with in Vpc and it is not exposed to internet (ex -
+private subnets are used for apps which are not internet facing ( ex- data base server)
+----------------------------------------------------------------------------------------------
+
+What is the best ways to design Vpc & subnets 
+If our region has 3 AZ then create 3 public subnets and 3 private subnets 
+VPC and subnets are free
+In one region we can have max of 5 vpc's and if we required more than 5 we need to raise  a support case to Amazon (ticke to amazon.
+
+Creating VPC :-
+Default vpc:Every aws account comes with 1 default vpc in every region 
+			Default vpc cotains 1 public subnet for each AZ there wont be private subnets.
+			Defaultvpc is ready to use VPC
+			By default ec2 is launcehed in to default VPC.
+			we can delte default vpc , if we want default VPC we can recreate on your own, ( services - vpc - your vpc - actions - create default vpc)
+			every ec2 in default vpc gets public IP by default.
+			
+	CIDER : - Class less inter domain routing
+				It is used for IP adressing
+	syntax : 
+	x.x.x.x/y ---> IPV4
+	Ipv4 uses 32 bits
+	ipv4 has 4 octates i.e 4*8 =32
+	
+	172.20.0.0/16
+	
+	In a CIDR we have 32 bits , we usally divide them in to host bits and n/w bits 
+	
+	172.20.0.0/16  ( in this example 16 bits allocated to n/w ) 32-16 =16 is allocated to host
+	
+	No of hosts = 2^16 = 65536 ( we can launch this many instances )
+	
+	ex2 : 172.20.1.0/24 ( No. of hosts = 2^8 = 256 )[ 1st 172.20 is for n/w and remaining 1.0 will be for host ]
+			
+			
+			
+services - vpc
+
+
+
+
+
+
